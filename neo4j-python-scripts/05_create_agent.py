@@ -2,7 +2,7 @@ import os
 from uuid import uuid4
 from dotenv import load_dotenv
 from langchain_community.tools import YouTubeSearchTool
-from langchain_openai import ChatOpenAI
+from langchain_openai import ChatOpenAI as Chat
 from langchain.agents import AgentExecutor, create_react_agent
 from langchain.tools import Tool
 from langchain import hub
@@ -15,15 +15,18 @@ from langchain_community.graphs import Neo4jGraph
 # Load environment variables from .env file
 load_dotenv()
 
+# Initialize OpenAI Chat model
+openai_api_key = os.getenv("OPENAI_API_KEY")
+model = os.getenv("OPENAI_MODEL", "gpt-4o")
+temperature = float(os.getenv("OPENAI_TEMPERATURE", 0))
+llm = Chat(openai_api_key=openai_api_key, model=model, temperature=temperature)
+
 # Initialize YouTube search tool
 youtube = YouTubeSearchTool()
 
 # Generate a unique session ID
 SESSION_ID = str(uuid4())
 print(f"Session ID: {SESSION_ID}")
-
-# Initialize the language model with the OpenAI API key from environment variables
-llm = ChatOpenAI(openai_api_key=os.getenv("OPENAI_API_KEY"))
 
 # Function to call YouTube trailer search tool
 
@@ -41,12 +44,10 @@ graph = Neo4jGraph(
 )
 
 # Define the chat prompt template
-prompt = ChatPromptTemplate.from_messages(
-    [
-        ("system", "You are a movie expert. You find movies from a genre or plot."),
-        ("human", "{input}"),
-    ]
-)
+prompt = ChatPromptTemplate.from_messages([
+    ("system", "You are a movie expert. You find movies from a genre or plot."),
+    ("human", "{input}"),
+])
 
 # Create the movie chat pipeline
 movie_chat = prompt | llm | StrOutputParser()
@@ -89,10 +90,17 @@ chat_agent = RunnableWithMessageHistory(
 )
 
 # Main loop to interact with the chat agent
-while True:
-    q = input("> ")
-    response = chat_agent.invoke(
-        {"input": q},
-        {"configurable": {"session_id": SESSION_ID}},
-    )
-    print(response["output"])
+
+
+def main():
+    while True:
+        q = input("> ")
+        response = chat_agent.invoke(
+            {"input": q},
+            {"configurable": {"session_id": SESSION_ID}},
+        )
+        print(response["output"])
+
+
+if __name__ == "__main__":
+    main()

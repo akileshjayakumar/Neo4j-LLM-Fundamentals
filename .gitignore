@@ -1,2 +1,4 @@
 .env
 neo4j_llm_env/
+.venv/
+node_modules/

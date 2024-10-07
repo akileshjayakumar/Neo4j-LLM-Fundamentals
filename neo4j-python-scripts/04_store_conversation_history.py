@@ -1,7 +1,7 @@
 import os
 from uuid import uuid4
 from dotenv import load_dotenv
-from langchain_openai import ChatOpenAI
+from langchain_openai import ChatOpenAI as Chat
 from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder
 from langchain.schema import StrOutputParser
 from langchain_core.runnables.history import RunnableWithMessageHistory
@@ -10,6 +10,16 @@ from langchain_community.chat_message_histories import Neo4jChatMessageHistory
 
 # Load environment variables from .env file
 load_dotenv()
+
+openai_api_key = os.getenv("OPENAI_API_KEY")
+model = os.getenv("OPENAI_MODEL", "gpt-4o")
+temperature = float(os.getenv("OPENAI_TEMPERATURE", 0))
+
+llm = Chat(
+    openai_api_key=openai_api_key,
+    model=model,
+    temperature=temperature
+)
 
 # Retrieve environment variables
 NEO4J_URL = os.getenv("NEO4J_URL")
@@ -35,11 +45,6 @@ def get_memory(session_id):
     return Neo4jChatMessageHistory(session_id=session_id, graph=graph)
 
 
-# Initialize ChatOpenAI with API key
-chat_llm = ChatOpenAI(
-    openai_api_key=OPENAI_API_KEY
-)
-
 # Define the chat prompt template
 prompt = ChatPromptTemplate.from_messages(
     [
@@ -54,7 +59,7 @@ prompt = ChatPromptTemplate.from_messages(
 )
 
 # Create the chat chain with message history
-chat_chain = prompt | chat_llm | StrOutputParser()
+chat_chain = prompt | llm | StrOutputParser()
 
 chat_with_message_history = RunnableWithMessageHistory(
     chat_chain,

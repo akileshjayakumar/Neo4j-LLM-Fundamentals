@@ -1,4 +1,4 @@
-from langchain_openai import ChatOpenAI
+from langchain_openai import ChatOpenAI as Chat
 from langchain_core.prompts import ChatPromptTemplate
 from langchain.schema import StrOutputParser
 from dotenv import load_dotenv
@@ -6,8 +6,14 @@ import os
 
 load_dotenv()
 
-chat_llm = ChatOpenAI(
-    openai_api_key=os.getenv("OPENAI_API_KEY")
+openai_api_key = os.getenv("OPENAI_API_KEY")
+model = os.getenv("OPENAI_MODEL", "gpt-4o")
+temperature = float(os.getenv("OPENAI_TEMPERATURE", 0))
+
+llm = Chat(
+    openai_api_key=openai_api_key,
+    model=model,
+    temperature=temperature
 )
 
 
@@ -22,7 +28,7 @@ prompt = ChatPromptTemplate.from_messages(
     ]
 )
 
-chat_chain = prompt | chat_llm | StrOutputParser()
+chat_chain = prompt | llm | StrOutputParser()
 
 current_weather = """
     {
