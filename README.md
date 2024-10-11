@@ -1,3 +1,2 @@
 # Neo4j Learning Repository
-
-This repo is for me to learn Neo4j from scratch. It contains various Python scripts that demonstrate different aspects of working with Neo4j, including creating chains, chat models, storing conversation history, and more.
+This repository is dedicated to learning Neo4j from the ground up. It includes a variety of Jupyter Notebooks that showcase different facets of working with Neo4j, such as creating chains, chat models, storing conversation history, and utilizing agents, among other features.
